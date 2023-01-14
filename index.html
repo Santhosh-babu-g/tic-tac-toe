@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tic Tac Toe</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap');
+        *{
+            font-family: 'Patrick Hand', cursive;
+        }
+        body{
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            height: 100vh;
+        }
+        .cell{
+            width: 100px;
+            height: 100px;
+            border: 2px solid;
+            box-shadow: 0 0 0 2px;
+            line-height: 100px;
+            font-size: 90px;
+            cursor: pointer;
+            text-align: center;
+            user-select: none;
+        }
+        #cellContainer{
+            display: grid;
+            grid-template-columns: repeat(3, auto);
+            width: 300px;
+            margin: auto;
+        }
+        #gameContainer{
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        #restartBtn{
+            margin:20px;
+            font-size: 40px;
+            font-family: 'Patrick Hand', cursive;
+            border: 4px solid black;
+            border-radius: 10px;
+        }
+        h1{
+            height: 60px;
+        }
+        h2{
+            height: 40px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Tic Tac Toe</h1>
+    <h2 id="statusText"></h2>
+    <div id="gameContainer">
+        <div id="cellContainer">
+            <div cellIndex="0" class="cell"></div>
+            <div cellIndex="1" class="cell"></div>
+            <div cellIndex="2" class="cell"></div>
+            <div cellIndex="3" class="cell"></div>
+            <div cellIndex="4" class="cell"></div>
+            <div cellIndex="5" class="cell"></div>
+            <div cellIndex="6" class="cell"></div>
+            <div cellIndex="7" class="cell"></div>
+            <div cellIndex="8" class="cell"></div>
+        </div>
+        <button id="restartBtn">RESTART</button>
+    </div>
+    <script>
+        let cellList = ['','','','','','','','',''];
+        let count = 0;
+        const winConditions = [
+            [0,1,2],
+            [3,4,5],
+            [6,7,8],
+            [0,3,6],
+            [1,4,7],
+            [2,5,8],
+            [0,4,8],
+            [2,4,6]
+        ];
+        const cells = document.querySelectorAll('.cell');
+        const statusText = document.getElementById('statusText');
+        let num,c,m;
+        function startgame(params) {
+            cells.forEach(e => {
+                e.onclick = function(){
+                    if (e.textContent == ''){
+                        e.textContent = 'X';
+                        count++;
+                        cellList[Number(e.getAttribute('cellIndex'))]='X';
+                        if(!checkWinner('X',cellList)){
+                            setTimeout(() => {
+                                computerPlay();
+                                if(checkWinner('O',cellList)){
+                                    cells.forEach(e=>e.onclick='');
+                                }
+                            }, 300);
+                        }else{
+                            cells.forEach(e=>e.onclick='');
+                        }  
+                    }
+                }
+            });
+        }
+        function computerPlay() {
+            console.log(count);
+            let items = [];
+            cellList.forEach((x,i)=>{
+                if (x==''){
+                    items.push(i);
+                }
+            })
+            num = items[Math.floor(Math.random()*items.length)];
+            if(cellList[4]=='X'){
+                if (count==1){
+                    items = [0,2,6,8];
+                    num = items[Math.floor(Math.random()*items.length)];
+                }else if (count==3){
+                    blocker();
+                    console.log(num);
+                    if (m==0){
+                        items=[];
+                        itemsDummy=[0,2,6,8];
+                        for (const i of itemsDummy) {
+                            if (cellList[i]==''){
+                                items.push(i);
+                            }
+                        }
+                        num = items[Math.floor(Math.random()*items.length)];
+                    }
+                }else{
+                    winner();
+                    if (m==0){
+                        blocker();
+                    }
+                }
+            }else if(cellList[0]=='X' || cellList[2]=='X' || cellList[6]=='X' || cellList[8]=='X'){
+                if (count==1){
+                    num=4;
+                }else if (count==3){
+                    blocker();
+                    console.log(m);
+                    if (m==0){
+                        items=[];
+                        itemsDummy=[1,3,5,7];
+                        for (const i of itemsDummy) {
+                            if (cellList[i]==''){
+                                items.push(i);
+                            }
+                        }
+                        num = items[Math.floor(Math.random()*items.length)];
+                    }
+                }else{
+                    winner();
+                    if (m==0){
+                        blocker();
+                    }
+                }
+            }else{
+                if(count==1){
+                    items = [0,2,6,8];
+                    num = items[Math.floor(Math.random()*items.length)];
+                }else{
+                    winner();
+                    if (m==0){
+                        blocker();
+                    }
+                }
+            }
+            cells.forEach((e)=>{
+                if (e.getAttribute('cellIndex')==num){
+                    e.textContent = 'O';
+                    count++;
+                    cellList[num]='O';
+                }
+            })
+        }
+
+        function winner() {
+            m = 0;
+            for (const i of winConditions){
+                c = 0;
+                for (j = 0;j<i.length;j++) {
+                    if (cellList[i[j]]=='O'){
+                        c++;
+                    }
+                }
+                if (c==2){
+                    for (j = 0;j<i.length;j++) {
+                        if (cellList[i[j]]==''){
+                            num = i[j];
+                            m++;
+                        }
+                    }
+                }
+            }
+            
+        }
+
+        function blocker() {
+            m=0;
+            for (const i of winConditions){
+                c=0;
+                for (j = 0;j<i.length;j++) {
+                    if (cellList[i[j]]=='X'){
+                        c++;
+                    }
+                }
+                if (c==2){
+                    for (j = 0;j<i.length;j++) {
+                        if (cellList[i[j]]==''){
+                            num = i[j];
+                            m++;
+                        }
+                    }
+                }
+            }
+        }
+
+        function checkWinner(currentPlayer,cellList){
+            let wonRound = false;
+            for (let i = 0; i < winConditions.length; i++) {
+                const element = winConditions[i];
+                let cellA = cellList[element[0]];
+                let cellB = cellList[element[1]];
+                let cellC = cellList[element[2]];
+                if (cellA == '' || cellB == '' || cellC == ''){
+                    continue;
+                }
+                if (cellA == cellB && cellB == cellC){
+                    if (currentPlayer=='X'){
+                        statusText.textContent = `You Win!`;
+                        cells.forEach((e)=>{
+                            if (winConditions[i].includes(Number(e.getAttribute('cellIndex')))){
+                                e.style.backgroundColor='green';
+                            }
+                        })
+                    }else{
+                        statusText.textContent = `You Lose!`;
+                        console.log(i);
+                        cells.forEach((e)=>{
+                            if (winConditions[i].includes(Number(e.getAttribute('cellIndex')))){
+                                e.style.backgroundColor='red';
+                            }
+                        })
+                    }
+                    return true;
+                }
+            }
+            if(!cellList.includes('')){
+                statusText.textContent = 'Draw!';
+                return true;
+            }
+            return false;
+        }
+        document.getElementById('restartBtn').onclick = ()=>{
+            cellList = ['','','','','','','','',''];
+            count = 0;
+            cells.forEach(e=>{
+                e.textContent = '';
+                e.style.backgroundColor = '#fff';
+            })
+            statusText.textContent = '';
+            startgame();
+        }
+        startgame();
+    </script>
+</body>
+</html>
